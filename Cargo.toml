@@ -1,0 +1,15 @@
+[package]
+name = "aoc2025"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+paste = "1.0.15"
+
+[dev-dependencies]
+iai = {git = "https://github.com/sigaloid/iai", rev = "d56a597"}
+paste = "1.0.15"
+
+[[bench]]
+name = "iai"
+harness = false

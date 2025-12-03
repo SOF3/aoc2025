@@ -1,0 +1,46 @@
+macro_rules! solutions {
+    ($($day:literal $id:ident,)*) => {
+        paste::paste! {
+            $(
+                mod [<d $day $id>];
+                pub use [<d $day $id>]::run as [<d $day $id>];
+            )*
+
+            pub fn select(id: &str) -> Option<fn(&str) -> String> {
+                match id {
+                    $(concat!("d", stringify!($day), stringify!($id)) => Some(|s| [<d $day $id>](StrOrSlice::str_or_slice(s)).to_string()),)*
+                    _ => None,
+                }
+            }
+
+            pub const OPTIONS: &[&'static str] = &[];
+
+            #[macro_export]
+            macro_rules! idents {
+                ($macro:ident) => {
+                    $macro!($($day [<d $day $id>],)*);
+                };
+            }
+        }
+    };
+}
+
+solutions! {
+    1 p1,
+    1 p1_euclid,
+    1 p2,
+    2 p1,
+    2 p2,
+}
+
+pub trait StrOrSlice {
+    fn str_or_slice(s: &str) -> &Self;
+}
+
+impl StrOrSlice for str {
+    fn str_or_slice(s: &str) -> &Self { s }
+}
+
+impl StrOrSlice for [u8] {
+    fn str_or_slice(s: &str) -> &Self { s.as_bytes() }
+}
