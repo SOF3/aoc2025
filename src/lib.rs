@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 macro_rules! solutions {
     ($($day:literal $id:ident,)*) => {
         paste::paste! {
@@ -31,6 +33,8 @@ solutions! {
     1 p2,
     2 p1,
     2 p2,
+    3 p1,
+    3 p2,
 }
 
 pub trait StrOrSlice {
