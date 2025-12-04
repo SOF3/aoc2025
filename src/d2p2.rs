@@ -24,8 +24,7 @@ fn solve_once(range: &[u8]) -> u64 {
         for factor in factorize(n) {
             let sum = solve_within(
                 n,
-                factor.part_len,
-                factor.part_cnt,
+                factor,
                 start,
                 start_digits,
                 end,
@@ -43,25 +42,23 @@ fn solve_once(range: &[u8]) -> u64 {
 
 fn solve_within(
     digits: usize,
-    part_len: usize,
-    part_cnt: usize,
+    factor: &PreparedFactor,
     start: u64,
     start_digits: usize,
     end: u64,
     end_digits: usize,
 ) -> u64 {
     let Some((first, last)) =
-        get_bounds(digits, part_len, part_cnt, start, start_digits, end, end_digits)
+        get_bounds(digits, factor, start, start_digits, end, end_digits)
     else {
         return 0;
     };
-    gaussian(first, last) * splat(1, part_len, part_cnt)
+    gaussian(first, last) * factor.splat
 }
 
 fn get_bounds(
     digits: usize,
-    part_len: usize,
-    part_cnt: usize,
+    factor: &PreparedFactor,
     mut start: u64,
     start_digits: usize,
     mut end: u64,
@@ -74,17 +71,17 @@ fn get_bounds(
         end = pow10(digits) - 1;
     }
 
-    let prefix_div = pow10(part_len * (part_cnt - 1));
+    let prefix_div = factor.prefix_div;
 
     let start_prefix = start / prefix_div;
     let mut first_elem = start_prefix;
-    if splat(start_prefix, part_len, part_cnt) < start {
+    if start_prefix * factor.splat < start {
         first_elem += 1;
     }
 
     let end_prefix = end / prefix_div;
     let mut last_elem = end_prefix;
-    if splat(end_prefix, part_len, part_cnt) > end {
+    if end_prefix * factor.splat > end {
         last_elem -= 1;
     }
 
@@ -95,17 +92,19 @@ fn get_bounds(
     Some((first_elem, last_elem))
 }
 
-fn splat(substr: u64, len: usize, cnt: usize) -> u64 {
+const fn splat(substr: u64, len: usize, cnt: usize) -> u64 {
     let mut result = 0;
-    for i in 0..cnt {
-        result += substr * pow10(len * i);
+    let mut i = 0u32;
+    while i < (cnt as u32) {
+        result += substr * pow10_match((len as u32) * i);
+        i += 1;
     }
     result
 }
 
-fn pow10(exp: usize) -> u64 { pow10_match(exp as u32) }
+const fn pow10(exp: usize) -> u64 { pow10_match(exp as u32) }
 
-fn pow10_match(exp: u32) -> u64 {
+const fn pow10_match(exp: u32) -> u64 {
     match exp {
         0 => 1,
         1 => 10,
@@ -133,25 +132,25 @@ fn pow10_match(exp: u32) -> u64 {
 
 fn gaussian(a: u64, b: u64) -> u64 { (b - a + 1) * (a + b) / 2 }
 
-fn factorize(digits: usize) -> &'static [Factor] {
+const fn factorize(digits: usize) -> &'static [PreparedFactor] {
     match digits {
         1 => &[],
-        2 => &[Factor { part_len: 1, part_cnt: 2, negate: false }],
-        3 => &[Factor { part_len: 1, part_cnt: 3, negate: false }],
-        4 => &[Factor { part_len: 2, part_cnt: 2, negate: false }],
-        5 => &[Factor { part_len: 1, part_cnt: 5, negate: false }],
+        2 => &[const{Factor { part_len: 1, part_cnt: 2, negate: false }.prepare()}],
+        3 => &[const{Factor { part_len: 1, part_cnt: 3, negate: false }.prepare()}],
+        4 => &[const{Factor { part_len: 2, part_cnt: 2, negate: false }.prepare()}],
+        5 => &[const{Factor { part_len: 1, part_cnt: 5, negate: false }.prepare()}],
         6 => &[
-            Factor { part_len: 2, part_cnt: 3, negate: false },
-            Factor { part_len: 3, part_cnt: 2, negate: false },
-            Factor { part_len: 1, part_cnt: 6, negate: true },
+            const{Factor { part_len: 2, part_cnt: 3, negate: false }.prepare()},
+            const{Factor { part_len: 3, part_cnt: 2, negate: false }.prepare()},
+            const{Factor { part_len: 1, part_cnt: 6, negate: true }.prepare()},
         ],
-        7 => &[Factor { part_len: 1, part_cnt: 7, negate: false }],
-        8 => &[Factor { part_len: 4, part_cnt: 2, negate: false }],
-        9 => &[Factor { part_len: 3, part_cnt: 3, negate: false }],
+        7 => &[const{Factor { part_len: 1, part_cnt: 7, negate: false }.prepare()}],
+        8 => &[const{Factor { part_len: 4, part_cnt: 2, negate: false }.prepare()}],
+        9 => &[const{Factor { part_len: 3, part_cnt: 3, negate: false }.prepare()}],
         10 => &[
-            Factor { part_len: 2, part_cnt: 5, negate: false },
-            Factor { part_len: 5, part_cnt: 2, negate: false },
-            Factor { part_len: 1, part_cnt: 10, negate: true },
+            const{Factor { part_len: 2, part_cnt: 5, negate: false }.prepare()},
+            const{Factor { part_len: 5, part_cnt: 2, negate: false }.prepare()},
+            const{Factor { part_len: 1, part_cnt: 10, negate: true }.prepare()},
         ],
         _ => unreachable!(),
     }
@@ -162,6 +161,22 @@ struct Factor {
     part_len: usize,
     part_cnt: usize,
     negate:   bool,
+}
+
+struct PreparedFactor {
+    negate:   bool,
+    splat: u64,
+    prefix_div: u64,
+}
+
+impl Factor {
+    const fn prepare(self) -> PreparedFactor {
+        PreparedFactor {
+            negate:   self.negate,
+            splat: splat(1, self.part_len, self.part_cnt),
+            prefix_div: pow10(self.part_len * (self.part_cnt - 1)),
+        }
+    }
 }
 
 #[cfg(test)]
@@ -175,10 +190,10 @@ mod tests {
 
     #[test]
     fn test_get_bounds() {
-        assert_eq!(super::get_bounds(4, 2, 2, 123, 3, 12345, 5), Some((10, 99)));
-        assert_eq!(super::get_bounds(4, 2, 2, 1234, 4, 9876, 4), Some((13, 97)));
-        assert_eq!(super::get_bounds(4, 2, 2, 1111, 4, 8888, 4), Some((11, 88)));
-        assert_eq!(super::get_bounds(4, 2, 2, 4321, 4, 5678, 4), Some((43, 56)));
-        assert_eq!(super::get_bounds(4, 2, 2, 1234, 4, 1235, 4), None);
+        assert_eq!(super::get_bounds(4, &super::factorize(2)[0], 123, 3, 12345, 5), Some((10, 99)));
+        assert_eq!(super::get_bounds(4, &super::factorize(2)[0], 1234, 4, 9876, 4), Some((13, 97)));
+        assert_eq!(super::get_bounds(4, &super::factorize(2)[0], 1111, 4, 8888, 4), Some((11, 88)));
+        assert_eq!(super::get_bounds(4, &super::factorize(2)[0], 4321, 4, 5678, 4), Some((43, 56)));
+        assert_eq!(super::get_bounds(4, &super::factorize(2)[0], 1234, 4, 1235, 4), None);
     }
 }
