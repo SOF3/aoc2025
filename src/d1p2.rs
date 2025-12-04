@@ -1,3 +1,5 @@
+use std::hint::unreachable_unchecked;
+
 pub fn run(mut s: &[u8]) -> u32 {
     let mut sum = 50i32;
     let mut cnt = 0;
@@ -10,7 +12,7 @@ pub fn run(mut s: &[u8]) -> u32 {
             b'R' => {
                 run_once(&mut s, &mut sum, &mut cnt, |a, b| *a += b);
             }
-            _ => (),
+            _ => unsafe { unreachable_unchecked() },
         }
     }
     cnt
@@ -24,7 +26,7 @@ fn parse_once(s: &[u8]) -> (usize, u8, i32) {
     } else if s.get(3) == Some(&b'\n') {
         (4, s[0] - b'0', i32::from(s[1] - b'0') * 10 + i32::from(s[2] - b'0'))
     } else {
-        unreachable!()
+        unsafe { unreachable_unchecked() }
     }
 }
 
