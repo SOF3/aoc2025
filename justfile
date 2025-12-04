@@ -8,3 +8,6 @@ run day part *var:
         curl -sSL -H "Cookie: session=$(cat cookie)" "https://adventofcode.com/2025/day/{{day}}/input" -o inputs/day{{day}}.txt
     fi
     cargo run -- d{{day}}p{{part}}{{var}}
+
+render-day4:
+    cargo run -p render-day4 -- $(realpath inputs/day4.txt)
