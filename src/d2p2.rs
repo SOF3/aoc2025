@@ -22,14 +22,7 @@ fn solve_once(range: &[u8]) -> u64 {
     let mut output = 0;
     for n in start_digits..=end_digits {
         for factor in factorize(n) {
-            let sum = solve_within(
-                n,
-                factor,
-                start,
-                start_digits,
-                end,
-                end_digits,
-            );
+            let sum = solve_within(n, factor, start, start_digits, end, end_digits);
             if factor.negate {
                 output -= sum;
             } else {
@@ -48,8 +41,7 @@ fn solve_within(
     end: u64,
     end_digits: usize,
 ) -> u64 {
-    let Some((first, last)) =
-        get_bounds(digits, factor, start, start_digits, end, end_digits)
+    let Some((first, last)) = get_bounds(digits, factor, start, start_digits, end, end_digits)
     else {
         return 0;
     };
@@ -135,22 +127,22 @@ fn gaussian(a: u64, b: u64) -> u64 { (b - a + 1) * (a + b) / 2 }
 const fn factorize(digits: usize) -> &'static [PreparedFactor] {
     match digits {
         1 => &[],
-        2 => &[const{Factor { part_len: 1, part_cnt: 2, negate: false }.prepare()}],
-        3 => &[const{Factor { part_len: 1, part_cnt: 3, negate: false }.prepare()}],
-        4 => &[const{Factor { part_len: 2, part_cnt: 2, negate: false }.prepare()}],
-        5 => &[const{Factor { part_len: 1, part_cnt: 5, negate: false }.prepare()}],
+        2 => &[const { Factor { part_len: 1, part_cnt: 2, negate: false }.prepare() }],
+        3 => &[const { Factor { part_len: 1, part_cnt: 3, negate: false }.prepare() }],
+        4 => &[const { Factor { part_len: 2, part_cnt: 2, negate: false }.prepare() }],
+        5 => &[const { Factor { part_len: 1, part_cnt: 5, negate: false }.prepare() }],
         6 => &[
-            const{Factor { part_len: 2, part_cnt: 3, negate: false }.prepare()},
-            const{Factor { part_len: 3, part_cnt: 2, negate: false }.prepare()},
-            const{Factor { part_len: 1, part_cnt: 6, negate: true }.prepare()},
+            const { Factor { part_len: 2, part_cnt: 3, negate: false }.prepare() },
+            const { Factor { part_len: 3, part_cnt: 2, negate: false }.prepare() },
+            const { Factor { part_len: 1, part_cnt: 6, negate: true }.prepare() },
         ],
-        7 => &[const{Factor { part_len: 1, part_cnt: 7, negate: false }.prepare()}],
-        8 => &[const{Factor { part_len: 4, part_cnt: 2, negate: false }.prepare()}],
-        9 => &[const{Factor { part_len: 3, part_cnt: 3, negate: false }.prepare()}],
+        7 => &[const { Factor { part_len: 1, part_cnt: 7, negate: false }.prepare() }],
+        8 => &[const { Factor { part_len: 4, part_cnt: 2, negate: false }.prepare() }],
+        9 => &[const { Factor { part_len: 3, part_cnt: 3, negate: false }.prepare() }],
         10 => &[
-            const{Factor { part_len: 2, part_cnt: 5, negate: false }.prepare()},
-            const{Factor { part_len: 5, part_cnt: 2, negate: false }.prepare()},
-            const{Factor { part_len: 1, part_cnt: 10, negate: true }.prepare()},
+            const { Factor { part_len: 2, part_cnt: 5, negate: false }.prepare() },
+            const { Factor { part_len: 5, part_cnt: 2, negate: false }.prepare() },
+            const { Factor { part_len: 1, part_cnt: 10, negate: true }.prepare() },
         ],
         _ => unreachable!(),
     }
@@ -164,16 +156,16 @@ struct Factor {
 }
 
 struct PreparedFactor {
-    negate:   bool,
-    splat: u64,
+    negate:     bool,
+    splat:      u64,
     prefix_div: u64,
 }
 
 impl Factor {
     const fn prepare(self) -> PreparedFactor {
         PreparedFactor {
-            negate:   self.negate,
-            splat: splat(1, self.part_len, self.part_cnt),
+            negate:     self.negate,
+            splat:      splat(1, self.part_len, self.part_cnt),
             prefix_div: pow10(self.part_len * (self.part_cnt - 1)),
         }
     }
