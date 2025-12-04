@@ -51,31 +51,34 @@ fn solve_within(
 fn get_bounds(
     digits: usize,
     factor: &PreparedFactor,
-    mut start: u64,
+    start: u64,
     start_digits: usize,
     mut end: u64,
     end_digits: usize,
 ) -> Option<(u64, u64)> {
-    if start_digits < digits {
-        start = pow10(digits - 1);
-    }
-    if end_digits > digits {
-        end = pow10(digits) - 1;
-    }
-
     let prefix_div = factor.prefix_div;
 
-    let start_prefix = start / prefix_div;
-    let mut first_elem = start_prefix;
-    if start_prefix * factor.splat < start {
-        first_elem += 1;
-    }
+    let first_elem = if start_digits < digits {
+        factor.min_prefix
+    } else {
+        let start_prefix = start / prefix_div;
+        let mut first_elem = start_prefix;
+        if start_prefix * factor.splat < start {
+            first_elem += 1;
+        }
+        first_elem
+    };
 
-    let end_prefix = end / prefix_div;
-    let mut last_elem = end_prefix;
-    if end_prefix * factor.splat > end {
-        last_elem -= 1;
-    }
+    let last_elem = if end_digits > digits {
+        factor.max_prefix
+    } else {
+        let end_prefix = end / prefix_div;
+        let mut last_elem = end_prefix;
+        if end_prefix * factor.splat > end {
+            last_elem -= 1;
+        }
+        last_elem
+    };
 
     if first_elem > last_elem {
         return None;
@@ -122,7 +125,7 @@ const fn pow10_match(exp: u32) -> u64 {
     }
 }
 
-fn gaussian(a: u64, b: u64) -> u64 { (b - a + 1) * (a + b) / 2 }
+fn gaussian(a: u64, b: u64) -> u64 { (b + 1 - a) * (a + b) / 2 }
 
 const fn factorize(digits: usize) -> &'static [PreparedFactor] {
     match digits {
@@ -159,6 +162,8 @@ struct PreparedFactor {
     negate:     bool,
     splat:      u64,
     prefix_div: u64,
+    min_prefix: u64,
+    max_prefix: u64,
 }
 
 impl Factor {
@@ -167,6 +172,8 @@ impl Factor {
             negate:     self.negate,
             splat:      splat(1, self.part_len, self.part_cnt),
             prefix_div: pow10(self.part_len * (self.part_cnt - 1)),
+            min_prefix: pow10(self.part_len - 1),
+            max_prefix: pow10(self.part_len) - 1,
         }
     }
 }
