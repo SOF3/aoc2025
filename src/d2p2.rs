@@ -53,7 +53,7 @@ fn get_bounds(
     factor: &PreparedFactor,
     start: u64,
     start_digits: usize,
-    mut end: u64,
+    end: u64,
     end_digits: usize,
 ) -> Option<(u64, u64)> {
     let prefix_div = factor.prefix_div;

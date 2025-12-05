@@ -9,4 +9,3 @@ Type@10ms "just render-day4"
 Enter
 Sleep 10s
 Type "q"
-
