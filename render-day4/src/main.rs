@@ -88,8 +88,7 @@ fn simulate_once(row_length: usize, states: &mut [State]) {
 
         let mut presence = 0;
         for idx in adjacencies(x, y, row_length) {
-            if states[idx].present {
-            }
+            if states[idx].present {}
             presence += states[idx].present as u32;
         }
         if presence < 4 {

@@ -35,6 +35,9 @@ solutions! {
     2 p2,
     3 p1,
     3 p2,
+    5 p1_zip,
+    5 p1_bsearch,
+    5 p2,
 }
 
 pub trait StrOrSlice {
