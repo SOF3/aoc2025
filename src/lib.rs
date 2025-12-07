@@ -1,4 +1,5 @@
 #![allow(dead_code)]
+#![feature(portable_simd)]
 
 macro_rules! solutions {
     ($($day:literal $id:ident,)*) => {
@@ -38,6 +39,8 @@ solutions! {
     5 p1_zip,
     5 p1_bsearch,
     5 p2,
+    6 p1,
+    6 p2,
 }
 
 pub trait StrOrSlice {
