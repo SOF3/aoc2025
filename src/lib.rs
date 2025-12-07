@@ -43,6 +43,7 @@ solutions! {
     6 p2,
     7 p1_copy,
     7 p1_fill,
+    7 p2_copy,
     7 p2_fill,
 }
 
