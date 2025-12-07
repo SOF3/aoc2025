@@ -6,22 +6,19 @@ pub fn run(input: &[u8]) -> u64 {
         let center = input.iter().position(|&b| b == b'S').unwrap();
         buf[center] = 1;
 
-        let mut swap = vec![0u64; line_width];
+        let mut swap = buf.clone();
 
         (line_width * 2..input.len()).step_by(line_width * 2).enumerate().for_each(
             |(line_no, line_start)| {
-                swap.fill(0);
                 let start = center - line_no - 1;
                 let end = center + 2 + line_no;
                 for col in start..end {
-                    if let &paths @ 1.. = buf.get_unchecked(col) {
-                        let has_split = input.get_unchecked(line_start + col) == &b'^';
-                        if has_split {
-                            *swap.get_unchecked_mut(col - 1) += paths;
-                            *swap.get_unchecked_mut(col + 1) += paths;
-                        } else {
-                            *swap.get_unchecked_mut(col) += paths;
-                        }
+                    let &paths = buf.get_unchecked(col);
+                    let has_split = input.get_unchecked(line_start + col) == &b'^';
+                    if has_split {
+                        *swap.get_unchecked_mut(col - 1) += paths;
+                        *swap.get_unchecked_mut(col) = 0;
+                        *swap.get_unchecked_mut(col + 1) += paths;
                     }
                 }
                 buf.copy_from_slice(&swap);
