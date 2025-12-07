@@ -16,7 +16,7 @@ pub fn run(mut input: &str) -> u32 {
 
         input = input.get_unchecked(1..);
 
-        let mut points = Vec::new();
+        let mut points = Vec::with_capacity(1024);
         while !input.is_empty() {
             let (point, n) = parse_int_until(input, b'\n');
             points.push(point);

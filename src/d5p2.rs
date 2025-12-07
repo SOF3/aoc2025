@@ -1,7 +1,7 @@
-use std::hint::{assert_unchecked, unreachable_unchecked};
+use std::hint::unreachable_unchecked;
 
 pub fn run(mut input: &str) -> u64 {
-    unsafe{
+    unsafe {
         let mut ranges = Vec::with_capacity(200);
 
         while input.as_bytes()[0] != b'\n' {
